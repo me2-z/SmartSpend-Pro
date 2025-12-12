@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartSpend Pro</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="favicon.png">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  
+  <style>
+    /* Chart placeholders */
+    .chart-placeholder {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-secondary, #f8f9fa);
+      border-radius: 8px;
+      color: var(--text-secondary, #6c757d);
+      font-style: italic;
+      margin: 10px 0;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    /* Toast notifications */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #10B981;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 10000;
+      animation: slideIn 0.3s ease-out;
+      font-weight: 500;
+      max-width: 350px;
+    }
+    
+    .toast.error {
+      background: #EF4444;
+    }
+    
+    .toast.warning {
+      background: #F59E0B;
+    }
+    
+    .toast.info {
+      background: #3B82F6;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    /* Small button styles */
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .btn-delete {
+      background: #EF4444;
+      color: white;
+    }
+    
+    .btn-delete:hover {
+      background: #DC2626;
+    }
+    
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="theme-light">
+  <header class="app-header" role="banner">
+    <div class="logo" aria-label="SmartSpend Pro">
+      <svg class="logo-icon" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" fill="#3B82F6" opacity="0.1"/>
+        <rect x="8" y="12" width="16" height="12" rx="2" fill="#3B82F6"/>
+        <circle cx="16" cy="16" r="3" fill="white"/>
+        <path d="M10 10h12v2H10z" fill="#3B82F6"/>
+      </svg>
+      <span class="logo-text">SmartSpend <strong>Pro</strong></span>
+    </div>
+    <div class="header-actions">
+      <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode">
+        <i class="fas fa-moon" aria-hidden="true"></i>
+        <i class="fas fa-sun" aria-hidden="true" style="display: none;"></i>
+      </button>
+      <button id="export-pdf" class="btn btn-primary" aria-label="Export PDF Report">
+        <i class="fas fa-file-pdf"></i> PDF Report
+      </button>
+      <button id="manage-categories-btn" class="btn btn-secondary" aria-label="Manage Categories">
+        <i class="fas fa-tags"></i> Categories
+      </button>
+    </div>
+  </header>
+  
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar" role="complementary">
+      <button id="sidebar-toggle" class="btn-sidebar-toggle" aria-expanded="true">
+        <i class="fas fa-bars"></i> Menu
+      </button>
+      <div class="sidebar-content" id="sidebar-content">
+        <section class="sidebar-section">
+          <h2 class="sidebar-heading">➕ Quick Expense</h2>
+          <form id="quick-expense-form" class="quick-form">
+            <input type="number" id="quick-amount" step="0.01" min="0.01" placeholder="Amount (e.g., 50.00)" required />
+            <input type="text" id="quick-desc" maxlength="50" placeholder="Description (e.g., Coffee)" />
+            <select id="quick-category" required style="padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <option value="food">🍕 Food</option>
+              <option value="travel">✈️ Travel</option>
+              <option value="shopping">🛍️ Shopping</option>
+              <option value="bills">💳 Bills</option>
+              <option value="entertainment">🎬 Entertainment</option>
+              <option value="healthcare">⚕️ Healthcare</option>
+              <option value="education">📚 Education</option>
+              <option value="others">📦 Others</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-plus-circle"></i> Add Expense
+            </button>
+          </form>
+        </section>
+        
+        <section class="sidebar-section">
+          <h2 class="sidebar-heading">📊 This Month</h2>
+          <div class="summary-card">
+            <div class="summary-value" id="total-spent">₹0.00</div>
+            <div class="summary-label">Total Spent</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value" id="avg-daily">₹0.00</div>
+            <div class="summary-label">Avg/Day</div>
+          </div>
+        </section>
+        
+        <section class="sidebar-section">
+          <h2 class="sidebar-heading">🔍 Filters</h2>
+          <div class="filter-group">
+            <label><input type="checkbox" data-filter="category" value="food"> 🍕 Food</label>
+            <label><input type="checkbox" data-filter="category" value="travel"> ✈️ Travel</label>
+            <label><input type="checkbox" data-filter="category" value="shopping"> 🛍️ Shopping</label>
+            <label><input type="checkbox" data-filter="category" value="bills"> 💳 Bills</label>
+            <label><input type="checkbox" data-filter="category" value="entertainment"> 🎬 Entertainment</label>
+            <label><input type="checkbox" data-filter="category" value="healthcare"> ⚕️ Healthcare</label>
+            <label><input type="checkbox" data-filter="category" value="education"> 📚 Education</label>
+            <label><input type="checkbox" data-filter="category" value="others"> 📦 Others</label>
+          </div>
+          <div class="filter-group">
+            <label>From: <input type="date" id="date-from"></label>
+            <label>To: <input type="date" id="date-to"></label>
+          </div>
+        </section>
+        
+        <section class="sidebar-section">
+          <h2 class="sidebar-heading">🎯 Budgets</h2>
+          <div id="budget-progress-list"></div>
+        </section>
+      </div>
+    </aside>
+    
+    <main id="main-content" class="main-content">
+      <div class="page-header">
+        <h1>Expenses</h1>
+        <div class="controls">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="Search expenses…" />
+          </div>
+          <div class="sort-controls">
+            <label>
+              Sort by:
+              <select id="sort-by">
+                <option value="date-desc">Date (Newest)</option>
+                <option value="amount-desc">Amount (High→Low)</option>
+                <option value="category">Category</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <section class="expenses-section">
+        <div class="table-container">
+          <table id="expenses-table" class="responsive-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body">
+              <tr class="no-data"><td colspan="5">No expenses yet. Add one!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      
+      <section class="charts-section">
+        <h2>📈 Monthly Insights</h2>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Spending by Category</h3>
+            <canvas id="category-chart" height="250" width="400"></canvas>
+            <div id="category-chart-placeholder" class="chart-placeholder">
+              Add expenses to see category breakdown
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>30-Day Trend</h3>
+            <canvas id="trend-chart" height="250" width="400"></canvas>
+            <div id="trend-chart-placeholder" class="chart-placeholder">
+              Add expenses to see spending trends
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section class="stats-section">
+        <h2>✨ Quick Stats</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total">₹0.00</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-count">0</div>
+            <div class="stat-label">Expenses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-top">—</div>
+            <div class="stat-label">Top</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg">₹0.00</div>
+            <div class="stat-label">Avg</div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <button id="fab" class="fab" aria-label="Add expense">
+      <i class="fas fa-plus"></i>
+    </button>
+    
+    <div id="category-modal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>➕ Manage Categories</h2>
+          <button id="close-category-modal" class="btn-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <div id="categories-list"></div>
+          <button id="add-custom-category-btn" class="btn btn-secondary btn-block mt-2">
+            <i class="fas fa-plus-circle"></i> Add New Category
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="toast-container" aria-live="polite"></div>
+  </div>
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+
+  <!-- Main Application Script -->
+  <script>
+    // SmartSpend Pro - Complete Working Application
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 SmartSpend Pro loaded');
+      
+      // ===== INITIALIZATION =====
+      // Theme
+      const savedTheme = localStorage.getItem('smartSpendTheme') || 'light';
+      document.body.className = 'theme-' + savedTheme;
+      
+      // Data
+      let expenses = JSON.parse(localStorage.getItem('smartSpendExpenses')) || [];
+      
+      // Charts
+      let categoryChart = null;
+      let trendChart = null;
+      
+      // Categories
+      const categories = {
+        'food': { name: 'Food', icon: '🍕', color: '#4CAF50' },
+        'travel': { name: 'Travel', icon: '✈️', color: '#2196F3' },
+        'shopping': { name: 'Shopping', icon: '🛍️', color: '#FF9800' },
+        'bills': { name: 'Bills', icon: '💳', color: '#9C27B0' },
+        'entertainment': { name: 'Entertainment', icon: '🎬', color: '#E91E63' },
+        'healthcare': { name: 'Healthcare', icon: '⚕️', color: '#00BCD4' },
+        'education': { name: 'Education', icon: '📚', color: '#3F51B5' },
+        'others': { name: 'Others', icon: '📦', color: '#607D8B' }
+      };
+      
+      // ===== DOM ELEMENTS =====
+      const expenseForm = document.getElementById('quick-expense-form');
+      const amountInput = document.getElementById('quick-amount');
+      const descInput = document.getElementById('quick-desc');
+      const categorySelect = document.getElementById('quick-category');
+      const expensesBody = document.getElementById('expenses-table-body');
+      const searchInput = document.getElementById('search-input');
+      const sortSelect = document.getElementById('sort-by');
+      const totalSpentElement = document.getElementById('total-spent');
+      const avgDailyElement = document.getElementById('avg-daily');
+      const statTotalElement = document.getElementById('stat-total');
+      const statCountElement = document.getElementById('stat-count');
+      const statTopElement = document.getElementById('stat-top');
+      const statAvgElement = document.getElementById('stat-avg');
+      const themeToggle = document.getElementById('theme-toggle');
+      const exportPdfBtn = document.getElementById('export-pdf');
+      const fabBtn = document.getElementById('fab');
+      const categoryChartCanvas = document.getElementById('category-chart');
+      const trendChartCanvas = document.getElementById('trend-chart');
+      const categoryPlaceholder = document.getElementById('category-chart-placeholder');
+      const trendPlaceholder = document.getElementById('trend-chart-placeholder');
+      
+      // ===== CORE FUNCTIONS =====
+      // Add Expense
+      function addExpense(amount, category, description) {
+        const newExpense = {
+          id: Date.now(),
+          amount: parseFloat(amount),
+          category: category,
+          description: description || 'Expense',
+          date: new Date().toISOString().split('T')[0],
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          timestamp: Date.now()
+        };
+        
+        expenses.push(newExpense);
+        saveData();
+        updateUI();
+        showToast(`✅ Added ₹${amount} for ${description || 'expense'}`, 'success');
+        
+        return newExpense;
+      }
+      
+      // Delete Expense
+      function deleteExpense(id) {
+        if (confirm('Delete this expense?')) {
+          expenses = expenses.filter(exp => exp.id !== id);
+          saveData();
+          updateUI();
+          showToast('🗑️ Expense deleted', 'info');
+        }
+      }
+      
+      // Save Data
+      function saveData() {
+        localStorage.setItem('smartSpendExpenses', JSON.stringify(expenses));
+      }
+      
+      // Show Toast
+      function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: ${type === 'error' ? '#EF4444' : type === 'warning' ? '#F59E0B' : type === 'info' ? '#3B82F6' : '#10B981'};
+          color: white;
+          padding: 14px 24px;
+          border-radius: 8px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          z-index: 10000;
+          animation: slideIn 0.3s ease-out;
+          font-weight: 500;
+          max-width: 350px;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => {
+            if (toast.parentNode) {
+              document.body.removeChild(toast);
+            }
+          }, 300);
+        }, 3000);
+      }
+      
+      // Calculate Statistics
+      function calculateStats(filteredExpenses = expenses) {
+        if (filteredExpenses.length === 0) {
+          return {
+            total: 0,
+            count: 0,
+            average: 0,
+            topCategory: '—',
+            today: 0,
+            week: 0,
+            avgDaily: 0
+          };
+        }
+        
+        const total = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const average = total / filteredExpenses.length;
+        
+        // Top category by amount
+        const categoryTotals = {};
+        filteredExpenses.forEach(exp => {
+          categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+        });
+        
+        let topCategory = '—';
+        let maxAmount = 0;
+        for (const [cat, amount] of Object.entries(categoryTotals)) {
+          if (amount > maxAmount) {
+            maxAmount = amount;
+            topCategory = categories[cat]?.name || cat;
+          }
+        }
+        
+        // Today's expenses
+        const today = new Date().toISOString().split('T')[0];
+        const todayExpenses = filteredExpenses.filter(exp => exp.date === today);
+        const todayTotal = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        
+        // Weekly expenses (last 7 days)
+        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const weekExpenses = filteredExpenses.filter(exp => {
+          const expDate = new Date(exp.date);
+          return expDate >= oneWeekAgo;
+        });
+        const weekTotal = weekExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        
+        // Average daily (last 30 days)
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const last30DaysExpenses = filteredExpenses.filter(exp => {
+          const expDate = new Date(exp.date);
+          return expDate >= thirtyDaysAgo;
+        });
+        const thirtyDayTotal = last30DaysExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const avgDaily = thirtyDayTotal / 30;
+        
+        return {
+          total: total.toFixed(2),
+          count: filteredExpenses.length,
+          average: average.toFixed(2),
+          topCategory: topCategory,
+          today: todayTotal.toFixed(2),
+          week: weekTotal.toFixed(2),
+          avgDaily: avgDaily.toFixed(2)
+        };
+      }
+      
+      // Update Charts
+      function updateCharts() {
+        const stats = calculateStats();
+        
+        // Category Chart
+        if (expenses.length > 0) {
+          categoryPlaceholder.style.display = 'none';
+          categoryChartCanvas.style.display = 'block';
+          
+          const categoryData = {};
+          expenses.forEach(exp => {
+            const cat = categories[exp.category]?.name || exp.category;
+            categoryData[cat] = (categoryData[cat] || 0) + exp.amount;
+          });
+          
+          const chartLabels = Object.keys(categoryData);
+          const chartData = Object.values(categoryData);
+          const chartColors = chartLabels.map(label => {
+            const cat = Object.values(categories).find(c => c.name === label);
+            return cat ? cat.color : '#607D8B';
+          });
+          
+          if (categoryChart) {
+            categoryChart.destroy();
+          }
+          
+          const ctx1 = categoryChartCanvas.getContext('2d');
+          categoryChart = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+              labels: chartLabels,
+              datasets: [{
+                data: chartData,
+                backgroundColor: chartColors,
+                borderWidth: 2,
+                borderColor: '#fff'
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                title: {
+                  display: true,
+                  text: 'Spending by Category'
+                }
+              }
+            }
+          });
+        } else {
+          categoryPlaceholder.style.display = 'flex';
+          categoryChartCanvas.style.display = 'none';
+        }
+        
+        // Trend Chart (Last 7 days)
+        if (expenses.length >= 2) {
+          trendPlaceholder.style.display = 'none';
+          trendChartCanvas.style.display = 'block';
+          
+          // Get last 7 days
+          const days = [];
+          const dailyTotals = {};
+          
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+            days.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+            dailyTotals[dateStr] = 0;
+          }
+          
+          // Calculate daily totals
+          expenses.forEach(exp => {
+            if (dailyTotals[exp.date] !== undefined) {
+              dailyTotals[exp.date] += exp.amount;
+            }
+          });
+          
+          const trendData = Object.values(dailyTotals);
+          
+          if (trendChart) {
+            trendChart.destroy();
+          }
+          
+          const ctx2 = trendChartCanvas.getContext('2d');
+          trendChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+              labels: days,
+              datasets: [{
+                label: 'Daily Spending',
+                data: trendData,
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                title: {
+                  display: true,
+                  text: '7-Day Spending Trend'
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function(value) {
+                      return '₹' + value;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        } else {
+          trendPlaceholder.style.display = 'flex';
+          trendChartCanvas.style.display = 'none';
+        }
+      }
+      
+      // Update UI
+      function updateUI() {
+        const stats = calculateStats();
+        
+        // Update stats
+        totalSpentElement.textContent = `₹${stats.total}`;
+        avgDailyElement.textContent = `₹${stats.avgDaily}`;
+        statTotalElement.textContent = `₹${stats.total}`;
+        statCountElement.textContent = stats.count;
+        statTopElement.textContent = stats.topCategory;
+        statAvgElement.textContent = `₹${stats.average}`;
+        
+        // Update expenses table
+        if (expenses.length === 0) {
+          expensesBody.innerHTML = '<tr class="no-data"><td colspan="5">No expenses yet. Add one!</td></tr>';
+        } else {
+          // Sort expenses
+          let sortedExpenses = [...expenses];
+          const sortBy = sortSelect.value;
+          
+          if (sortBy === 'date-desc') {
+            sortedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+          } else if (sortBy === 'amount-desc') {
+            sortedExpenses.sort((a, b) => b.amount - a.amount);
+          } else if (sortBy === 'category') {
+            sortedExpenses.sort((a, b) => (categories[a.category]?.name || a.category).localeCompare(categories[b.category]?.name || b.category));
+          }
+          
+          // Search filter
+          const searchTerm = searchInput.value.toLowerCase();
+          if (searchTerm) {
+            sortedExpenses = sortedExpenses.filter(exp => 
+              exp.description.toLowerCase().includes(searchTerm) ||
+              (categories[exp.category]?.name || exp.category).toLowerCase().includes(searchTerm)
+            );
+          }
+          
+          // Build table
+          let html = '';
+          sortedExpenses.forEach(exp => {
+            const category = categories[exp.category] || { name: exp.category, icon: '📝', color: '#666' };
+            html += `
+              <tr>
+                <td><strong>${exp.date}</strong><br><small>${exp.time}</small></td>
+                <td><span style="color:${category.color}">${category.icon} ${category.name}</span></td>
+                <td>${exp.description}</td>
+                <td><strong style="color:#E91E63">₹${exp.amount.toFixed(2)}</strong></td>
+                <td><button onclick="deleteExpense(${exp.id})" class="btn-small btn-delete"><i class="fas fa-trash"></i> Delete</button></td>
+              </tr>
+            `;
+          });
+          
+          if (sortedExpenses.length === 0) {
+            html = '<tr class="no-data"><td colspan="5">No expenses match your search</td></tr>';
+          }
+          
+          expensesBody.innerHTML = html;
+        }
+        
+        // Update charts
+        updateCharts();
+      }
+      
+      // Export PDF
+      function exportPDF() {
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          
+          // Title
+          doc.setFontSize(20);
+          doc.setTextColor(59, 130, 246);
+          doc.text('SmartSpend Pro Report', 105, 20, { align: 'center' });
+          
+          doc.setFontSize(11);
+          doc.setTextColor(100, 100, 100);
+          doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 105, 28, { align: 'center' });
+          
+          // Summary
+          const stats = calculateStats();
+          doc.setFontSize(14);
+          doc.setTextColor(0, 0, 0);
+          doc.text('Summary Statistics', 20, 45);
+          
+          doc.setFontSize(11);
+          doc.text(`Total Expenses: ${stats.count}`, 20, 55);
+          doc.text(`Total Amount: ₹${stats.total}`, 20, 62);
+          doc.text(`Average per Expense: ₹${stats.average}`, 20, 69);
+          doc.text(`Top Category: ${stats.topCategory}`, 20, 76);
+          
+          // Category Breakdown
+          doc.setFontSize(14);
+          doc.text('Category Breakdown', 20, 90);
+          
+          const categoryData = {};
+          expenses.forEach(exp => {
+            const cat = categories[exp.category]?.name || exp.category;
+            categoryData[cat] = (categoryData[cat] || 0) + exp.amount;
+          });
+          
+          let yPos = 100;
+          Object.entries(categoryData).forEach(([cat, amount]) => {
+            doc.text(`${cat}: ₹${amount.toFixed(2)}`, 20, yPos);
+            yPos += 7;
+          });
+          
+          // Recent Expenses Table
+          doc.setFontSize(14);
+          doc.text('Recent Expenses', 20, yPos + 10);
+          
+          const tableData = expenses.slice(-10).map(exp => [
+            exp.date,
+            categories[exp.category]?.name || exp.category,
+            exp.description,
+            `₹${exp.amount.toFixed(2)}`
+          ]);
+          
+          doc.autoTable({
+            startY: yPos + 15,
+            head: [['Date', 'Category', 'Description', 'Amount']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [59, 130, 246] }
+          });
+          
+          // Footer
+          const finalY = doc.lastAutoTable.finalY || yPos + 30;
+          doc.setFontSize(10);
+          doc.setTextColor(150, 150, 150);
+          doc.text('SmartSpend Pro - Your Personal Expense Tracker', 105, finalY + 10, { align: 'center' });
+          
+          // Save PDF
+          doc.save(`SmartSpend-Report-${new Date().toISOString().split('T')[0]}.pdf`);
+          
+          showToast('📄 PDF report generated successfully!', 'success');
+        } catch (error) {
+          console.error('PDF export error:', error);
+          showToast('❌ Failed to generate PDF. Please try again.', 'error');
+        }
+      }
+      
+      // ===== EVENT LISTENERS =====
+      // Form submission
+      expenseForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const amount = amountInput.value;
+        const description = descInput.value || 'Expense';
+        const category = categorySelect.value;
+        
+        if (!amount || amount <= 0) {
+          showToast('❌ Please enter a valid amount', 'error');
+          amountInput.focus();
+          return;
+        }
+        
+        addExpense(amount, category, description);
+        
+        // Reset form
+        amountInput.value = '';
+        descInput.value = '';
+        amountInput.focus();
+      });
+      
+      // Theme toggle
+      themeToggle.addEventListener('click', function() {
+        const isDark = document.body.classList.contains('theme-dark');
+        const newTheme = isDark ? 'light' : 'dark';
+        document.body.className = 'theme-' + newTheme;
+        localStorage.setItem('smartSpendTheme', newTheme);
+        
+        const moonIcon = this.querySelector('.fa-moon');
+        const sunIcon = this.querySelector('.fa-sun');
+        moonIcon.style.display = isDark ? 'inline' : 'none';
+        sunIcon.style.display = isDark ? 'none' : 'inline';
+        this.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        
+        showToast(isDark ? '🌞 Switched to light mode' : '🌙 Switched to dark mode', 'info');
+      });
+      
+      // PDF Export
+      exportPdfBtn.addEventListener('click', exportPDF);
+      
+      // FAB button
+      fabBtn.addEventListener('click', function() {
+        amountInput.focus();
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        showToast('✏️ Ready to add new expense!', 'info');
+      });
+      
+      // Search
+      searchInput.addEventListener('input', updateUI);
+      
+      // Sort
+      sortSelect.addEventListener('change', updateUI);
+      
+      // ===== INITIALIZE =====
+      // Make functions globally available
+      window.deleteExpense = deleteExpense;
+      
+      // Debug tools
+      window.smartSpendDebug = {
+        addTestExpense: function(amount = 100, category = 'food', description = 'Test Item') {
+          return addExpense(amount, category, description);
+        },
+        clearData: function() {
+          if (confirm('Clear ALL expenses? This cannot be undone.')) {
+            expenses = [];
+            saveData();
+            updateUI();
+            showToast('🗑️ All data cleared', 'warning');
+          }
+        },
+        showData: function() {
+          console.log('📊 Current expenses:', expenses);
+          console.log('📈 Statistics:', calculateStats());
+          showToast('📊 Data logged to console', 'info');
+          return {
+            expenses: expenses,
+            stats: calculateStats()
+          };
+        },
+        addSampleData: function() {
+          const samples = [
+            [56, 'food', 'Lunch'],
+            [150, 'travel', 'Train ticket'],
+            [299, 'shopping', 'New shoes'],
+            [45, 'food', 'Coffee'],
+            [120, 'entertainment', 'Movie tickets'],
+            [89, 'bills', 'Electricity bill'],
+            [65, 'healthcare', 'Medicine'],
+            [199, 'shopping', 'Groceries']
+          ];
+          
+          samples.forEach(([amount, category, desc], i) => {
+            setTimeout(() => {
+              addExpense(amount, category, desc);
+            }, i * 200);
+          });
+          
+          showToast('📊 Added sample data', 'success');
+        }
+      };
+      
+      console.log('✅ SmartSpend Pro initialized');
+      console.log('👉 Type "smartSpendDebug" in console for debug tools');
+      
+      // Initial UI update
+      updateUI();
+      
+      // Update theme button state
+      const isDark = savedTheme === 'dark';
+      const moonIcon = themeToggle.querySelector('.fa-moon');
+      const sunIcon = themeToggle.querySelector('.fa-sun');
+      moonIcon.style.display = isDark ? 'none' : 'inline';
+      sunIcon.style.display = isDark ? 'inline' : 'none';
+      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    });
+  </script>
+</body>
+</html>
