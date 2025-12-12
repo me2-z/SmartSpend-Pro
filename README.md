@@ -50,7 +50,8 @@ SmartSpend-Pro/
 ├── css/                       # Styles (app.css, themes.css)
 ├── js/                        # Modular JS (core, ui, features)
 ├── assets/                    # Logo.svg
-├── README.md                  # This file
+├── README.md                  # Readme file
 ├── .eslintrc.json             # Code quality
 
 └── favicon.ico                # App icon
+
