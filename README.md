@@ -4,7 +4,7 @@
 
 *Light & dark mode • Custom categories • PDF reports*
 
-![image alt]()
+![image alt](https://github.com/me2-z/SmartSpend-Pro/blob/e74a9c7a4402bfebd927846ab58b8d9fe3ab0ebf/git%20project%20showcase/SmartSpend-Pro%201st%20Overview.png)
 
 ---
 
@@ -52,4 +52,5 @@ SmartSpend-Pro/
 ├── assets/                    # Logo.svg
 ├── README.md                  # This file
 ├── .eslintrc.json             # Code quality
+
 └── favicon.ico                # App icon
