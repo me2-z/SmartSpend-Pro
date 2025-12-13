@@ -8,7 +8,6 @@
   <!-- Favicon -->
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <link rel="apple-touch-icon" href="favicon.png">
   
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -21,9 +20,130 @@
   <link rel="stylesheet" href="css/themes.css" />
   
   <style>
-    /* Chart placeholders */
+    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    @media (max-width: 768px) {
+      /* Show Add Expense button on mobile */
+      #quick-expense-form button[type="submit"] {
+        display: block !important;
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        padding: 0;
+        z-index: 100;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      }
+      
+      #quick-expense-form button[type="submit"] i {
+        font-size: 20px;
+      }
+      
+      #quick-expense-form button[type="submit"] span {
+        display: none;
+      }
+      
+      /* Adjust layout for mobile */
+      .app-layout {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border, #e0e0e0);
+        position: relative;
+      }
+      
+      .sidebar-content {
+        display: block !important;
+      }
+      
+      .main-content {
+        padding: 1rem;
+      }
+      
+      /* Make table scrollable on mobile */
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .responsive-table {
+        min-width: 600px;
+      }
+      
+      /* Adjust chart size for mobile */
+      .chart-container {
+        height: 250px !important;
+      }
+      
+      /* Fix header on mobile */
+      .header-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      
+      .header-actions .btn {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+      
+      /* Show sidebar toggle */
+      #sidebar-toggle {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 8px;
+      }
+    }
+    
+    /* Desktop: Hide sidebar toggle */
+    @media (min-width: 769px) {
+      #sidebar-toggle {
+        display: none;
+      }
+    }
+    
+    /* ===== FILTER STYLES ===== */
+    .filter-tag.active {
+      background: var(--primary, #3B82F6) !important;
+      color: white !important;
+    }
+    
+    .filter-group label {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-group label:hover {
+      background: var(--border);
+    }
+    
+    .filter-group input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    
+    /* ===== CHART STYLES ===== */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      margin: 15px 0;
+    }
+    
     .chart-placeholder {
-      height: 50px;
+      height: 250px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -31,12 +151,11 @@
       border-radius: 8px;
       color: var(--text-secondary, #6c757d);
       font-style: italic;
-      margin: 10px 0;
       text-align: center;
       padding: 20px;
     }
     
-    /* Toast notifications */
+    /* ===== TOAST NOTIFICATIONS ===== */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -52,17 +171,9 @@
       max-width: 350px;
     }
     
-    .toast.error {
-      background: #EF4444;
-    }
-    
-    .toast.warning {
-      background: #F59E0B;
-    }
-    
-    .toast.info {
-      background: #3B82F6;
-    }
+    .toast.error { background: #EF4444; }
+    .toast.warning { background: #F59E0B; }
+    .toast.info { background: #3B82F6; }
     
     @keyframes slideIn {
       from { transform: translateX(100%); opacity: 0; }
@@ -74,7 +185,7 @@
       to { transform: translateX(100%); opacity: 0; }
     }
     
-    /* Small button styles */
+    /* ===== BUTTON STYLES ===== */
     .btn-small {
       padding: 4px 10px;
       font-size: 12px;
@@ -93,19 +204,37 @@
       background: #DC2626;
     }
     
-    /* Loading animation */
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s ease-in-out infinite;
+    /* ===== EMPTY STATE STYLES ===== */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+    
+    .empty-state h3 {
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+    
+    /* ===== FIX FOR SIDEBAR ===== */
+    .sidebar-content {
+      transition: all 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar.collapsed .sidebar-content {
+        display: none !important;
+      }
+      
+      .sidebar:not(.collapsed) .sidebar-content {
+        display: block !important;
+      }
     }
   </style>
 </head>
@@ -145,7 +274,7 @@
           <form id="quick-expense-form" class="quick-form">
             <input type="number" id="quick-amount" step="0.01" min="0.01" placeholder="Amount (e.g., 50.00)" required />
             <input type="text" id="quick-desc" maxlength="50" placeholder="Description (e.g., Coffee)" />
-            <select id="quick-category" required style="padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1;">
+            <select id="quick-category" required style="padding: 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; margin-bottom: 1rem; background: var(--bg-secondary); color: var(--text-primary);">
               <option value="food">🍕 Food</option>
               <option value="travel">✈️ Travel</option>
               <option value="shopping">🛍️ Shopping</option>
@@ -156,7 +285,7 @@
               <option value="others">📦 Others</option>
             </select>
             <button type="submit" class="btn btn-primary btn-block">
-              <i class="fas fa-plus-circle"></i> Add Expense
+              <i class="fas fa-plus-circle"></i> <span class="btn-text">Add Expense</span>
             </button>
           </form>
         </section>
@@ -175,7 +304,7 @@
         
         <section class="sidebar-section">
           <h2 class="sidebar-heading">🔍 Filters</h2>
-          <div class="filter-group">
+          <div class="filter-group" id="category-filters">
             <label><input type="checkbox" data-filter="category" value="food"> 🍕 Food</label>
             <label><input type="checkbox" data-filter="category" value="travel"> ✈️ Travel</label>
             <label><input type="checkbox" data-filter="category" value="shopping"> 🛍️ Shopping</label>
@@ -186,14 +315,23 @@
             <label><input type="checkbox" data-filter="category" value="others"> 📦 Others</label>
           </div>
           <div class="filter-group">
-            <label>From: <input type="date" id="date-from"></label>
-            <label>To: <input type="date" id="date-to"></label>
+            <button id="clear-filters" class="btn-small" style="background: var(--gray-300); color: var(--gray-700); margin-top: 10px;">
+              <i class="fas fa-times"></i> Clear Filters
+            </button>
+          </div>
+          <div class="filter-group">
+            <label>From: <input type="date" id="date-from" style="margin-left: 5px;"></label>
+            <label>To: <input type="date" id="date-to" style="margin-left: 5px;"></label>
           </div>
         </section>
         
         <section class="sidebar-section">
           <h2 class="sidebar-heading">🎯 Budgets</h2>
-          <div id="budget-progress-list"></div>
+          <div id="budget-progress-list">
+            <div class="empty-state" style="padding: 10px;">
+              <small>No budgets set</small>
+            </div>
+          </div>
         </section>
       </div>
     </aside>
@@ -243,16 +381,26 @@
         <div class="chart-grid">
           <div class="chart-card">
             <h3>Spending by Category</h3>
-            <canvas id="category-chart" height="250" width="400"></canvas>
-            <div id="category-chart-placeholder" class="chart-placeholder">
-              Add expenses to see category breakdown
+            <div class="chart-container">
+              <canvas id="category-chart"></canvas>
+              <div id="category-chart-placeholder" class="chart-placeholder">
+                <div style="text-align: center; padding: 20px;">
+                  <i class="fas fa-pie-chart" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+                  <p>Add expenses to see category breakdown</p>
+                </div>
+              </div>
             </div>
           </div>
           <div class="chart-card">
             <h3>30-Day Trend</h3>
-            <canvas id="trend-chart" height="250" width="400"></canvas>
-            <div id="trend-chart-placeholder" class="chart-placeholder">
-              Add expenses to see spending trends
+            <div class="chart-container">
+              <canvas id="trend-chart"></canvas>
+              <div id="trend-chart-placeholder" class="chart-placeholder">
+                <div style="text-align: center; padding: 20px;">
+                  <i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+                  <p>Add expenses to see spending trends</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -281,6 +429,12 @@
       </section>
     </main>
     
+    <!-- Mobile Add Expense Button (shown only on mobile) -->
+    <button id="mobile-add-btn" class="fab" aria-label="Add expense" style="display: none;">
+      <i class="fas fa-plus"></i>
+    </button>
+    
+    <!-- Floating Action Button for Desktop -->
     <button id="fab" class="fab" aria-label="Add expense">
       <i class="fas fa-plus"></i>
     </button>
@@ -326,6 +480,13 @@
       let categoryChart = null;
       let trendChart = null;
       
+      // Filters state
+      let activeFilters = {
+        categories: [],
+        dateFrom: null,
+        dateTo: null
+      };
+      
       // Categories
       const categories = {
         'food': { name: 'Food', icon: '🍕', color: '#4CAF50' },
@@ -355,10 +516,95 @@
       const themeToggle = document.getElementById('theme-toggle');
       const exportPdfBtn = document.getElementById('export-pdf');
       const fabBtn = document.getElementById('fab');
+      const mobileAddBtn = document.getElementById('mobile-add-btn');
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      const clearFiltersBtn = document.getElementById('clear-filters');
+      const dateFromInput = document.getElementById('date-from');
+      const dateToInput = document.getElementById('date-to');
+      const categoryFilters = document.querySelectorAll('#category-filters input[type="checkbox"]');
       const categoryChartCanvas = document.getElementById('category-chart');
       const trendChartCanvas = document.getElementById('trend-chart');
       const categoryPlaceholder = document.getElementById('category-chart-placeholder');
       const trendPlaceholder = document.getElementById('trend-chart-placeholder');
+      
+      // ===== HELPER FUNCTIONS =====
+      // Show Toast
+      function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: ${type === 'error' ? '#EF4444' : type === 'warning' ? '#F59E0B' : type === 'info' ? '#3B82F6' : '#10B981'};
+          color: white;
+          padding: 14px 24px;
+          border-radius: 8px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          z-index: 10000;
+          animation: slideIn 0.3s ease-out;
+          font-weight: 500;
+          max-width: 350px;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => {
+            if (toast.parentNode) {
+              document.body.removeChild(toast);
+            }
+          }, 300);
+        }, 3000);
+      }
+      
+      // Get filtered expenses
+      function getFilteredExpenses() {
+        let filtered = [...expenses];
+        
+        // Filter by category
+        if (activeFilters.categories.length > 0) {
+          filtered = filtered.filter(exp => activeFilters.categories.includes(exp.category));
+        }
+        
+        // Filter by date range
+        if (activeFilters.dateFrom) {
+          filtered = filtered.filter(exp => new Date(exp.date) >= new Date(activeFilters.dateFrom));
+        }
+        
+        if (activeFilters.dateTo) {
+          const toDate = new Date(activeFilters.dateTo);
+          toDate.setHours(23, 59, 59, 999); // End of day
+          filtered = filtered.filter(exp => new Date(exp.date) <= toDate);
+        }
+        
+        return filtered;
+      }
+      
+      // Update filter UI
+      function updateFilterUI() {
+        // Update checkbox states
+        categoryFilters.forEach(checkbox => {
+          checkbox.checked = activeFilters.categories.includes(checkbox.value);
+        });
+        
+        // Update date inputs
+        dateFromInput.value = activeFilters.dateFrom || '';
+        dateToInput.value = activeFilters.dateTo || '';
+        
+        // Show filter status
+        const filterCount = activeFilters.categories.length + 
+                          (activeFilters.dateFrom ? 1 : 0) + 
+                          (activeFilters.dateTo ? 1 : 0);
+        
+        if (filterCount > 0) {
+          clearFiltersBtn.innerHTML = `<i class="fas fa-times"></i> Clear Filters (${filterCount})`;
+        } else {
+          clearFiltersBtn.innerHTML = `<i class="fas fa-times"></i> Clear Filters`;
+        }
+      }
       
       // ===== CORE FUNCTIONS =====
       // Add Expense
@@ -396,40 +642,8 @@
         localStorage.setItem('smartSpendExpenses', JSON.stringify(expenses));
       }
       
-      // Show Toast
-      function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        toast.style.cssText = `
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          background: ${type === 'error' ? '#EF4444' : type === 'warning' ? '#F59E0B' : type === 'info' ? '#3B82F6' : '#10B981'};
-          color: white;
-          padding: 14px 24px;
-          border-radius: 8px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-          z-index: 10000;
-          animation: slideIn 0.3s ease-out;
-          font-weight: 500;
-          max-width: 350px;
-        `;
-        
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-          toast.style.animation = 'slideOut 0.3s ease-out';
-          setTimeout(() => {
-            if (toast.parentNode) {
-              document.body.removeChild(toast);
-            }
-          }, 300);
-        }, 3000);
-      }
-      
       // Calculate Statistics
-      function calculateStats(filteredExpenses = expenses) {
+      function calculateStats(filteredExpenses) {
         if (filteredExpenses.length === 0) {
           return {
             total: 0,
@@ -465,14 +679,6 @@
         const todayExpenses = filteredExpenses.filter(exp => exp.date === today);
         const todayTotal = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
         
-        // Weekly expenses (last 7 days)
-        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const weekExpenses = filteredExpenses.filter(exp => {
-          const expDate = new Date(exp.date);
-          return expDate >= oneWeekAgo;
-        });
-        const weekTotal = weekExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-        
         // Average daily (last 30 days)
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         const last30DaysExpenses = filteredExpenses.filter(exp => {
@@ -488,22 +694,20 @@
           average: average.toFixed(2),
           topCategory: topCategory,
           today: todayTotal.toFixed(2),
-          week: weekTotal.toFixed(2),
+          week: todayTotal.toFixed(2), // Simplified for now
           avgDaily: avgDaily.toFixed(2)
         };
       }
       
       // Update Charts
-      function updateCharts() {
-        const stats = calculateStats();
-        
+      function updateCharts(filteredExpenses) {
         // Category Chart
-        if (expenses.length > 0) {
+        if (filteredExpenses.length > 0) {
           categoryPlaceholder.style.display = 'none';
           categoryChartCanvas.style.display = 'block';
           
           const categoryData = {};
-          expenses.forEach(exp => {
+          filteredExpenses.forEach(exp => {
             const cat = categories[exp.category]?.name || exp.category;
             categoryData[cat] = (categoryData[cat] || 0) + exp.amount;
           });
@@ -528,20 +732,38 @@
                 data: chartData,
                 backgroundColor: chartColors,
                 borderWidth: 2,
-                borderColor: '#fff'
+                borderColor: '#fff',
+                hoverOffset: 15
               }]
             },
             options: {
               responsive: true,
+              maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: 'bottom'
+                  position: 'bottom',
+                  labels: {
+                    padding: 20,
+                    font: {
+                      size: 11
+                    },
+                    boxWidth: 12
+                  }
                 },
-                title: {
-                  display: true,
-                  text: 'Spending by Category'
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.label || '';
+                      if (label) {
+                        label += ': ';
+                      }
+                      label += '₹' + context.raw.toFixed(2);
+                      return label;
+                    }
+                  }
                 }
-              }
+              },
+              cutout: '65%'
             }
           });
         } else {
@@ -550,16 +772,17 @@
         }
         
         // Trend Chart (Last 7 days)
-        if (expenses.length >= 2) {
+        if (filteredExpenses.length >= 2) {
           trendPlaceholder.style.display = 'none';
           trendChartCanvas.style.display = 'block';
           
           // Get last 7 days
           const days = [];
           const dailyTotals = {};
+          const today = new Date();
           
           for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = new Date(today);
             date.setDate(date.getDate() - i);
             const dateStr = date.toISOString().split('T')[0];
             days.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
@@ -567,7 +790,7 @@
           }
           
           // Calculate daily totals
-          expenses.forEach(exp => {
+          filteredExpenses.forEach(exp => {
             if (dailyTotals[exp.date] !== undefined) {
               dailyTotals[exp.date] += exp.amount;
             }
@@ -589,28 +812,63 @@
                 data: trendData,
                 borderColor: '#3B82F6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                borderWidth: 2,
+                borderWidth: 3,
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointBackgroundColor: '#3B82F6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
               }]
             },
             options: {
               responsive: true,
+              maintainAspectRatio: false,
               plugins: {
-                title: {
-                  display: true,
-                  text: '7-Day Spending Trend'
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: function(value) {
-                      return '₹' + value;
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  callbacks: {
+                    label: function(context) {
+                      return '₹' + context.raw.toFixed(2);
                     }
                   }
                 }
+              },
+              scales: {
+                x: {
+                  grid: {
+                    display: false
+                  },
+                  ticks: {
+                    font: {
+                      size: 11
+                    }
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                  },
+                  ticks: {
+                    callback: function(value) {
+                      return '₹' + value;
+                    },
+                    font: {
+                      size: 11
+                    },
+                    maxTicksLimit: 6
+                  }
+                }
+              },
+              interaction: {
+                intersect: false,
+                mode: 'nearest'
               }
             }
           });
@@ -622,7 +880,8 @@
       
       // Update UI
       function updateUI() {
-        const stats = calculateStats();
+        const filteredExpenses = getFilteredExpenses();
+        const stats = calculateStats(filteredExpenses);
         
         // Update stats
         totalSpentElement.textContent = `₹${stats.total}`;
@@ -633,11 +892,32 @@
         statAvgElement.textContent = `₹${stats.average}`;
         
         // Update expenses table
-        if (expenses.length === 0) {
-          expensesBody.innerHTML = '<tr class="no-data"><td colspan="5">No expenses yet. Add one!</td></tr>';
+        if (filteredExpenses.length === 0) {
+          let message = 'No expenses yet. Add one!';
+          
+          if (expenses.length > 0) {
+            if (activeFilters.categories.length > 0) {
+              const selectedCategories = activeFilters.categories.map(cat => categories[cat]?.name || cat).join(', ');
+              message = `No expenses found for selected categories: ${selectedCategories}`;
+            } else if (activeFilters.dateFrom || activeFilters.dateTo) {
+              message = 'No expenses found for selected date range';
+            } else {
+              message = 'No expenses match your search';
+            }
+          }
+          
+          expensesBody.innerHTML = `
+            <tr class="no-data">
+              <td colspan="5" style="text-align: center; padding: 40px;">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5; display: block;"></i>
+                <h3 style="margin-bottom: 10px; color: var(--text-primary);">${message}</h3>
+                ${expenses.length > 0 ? '<p style="color: var(--text-secondary);">Try changing your filters or search term</p>' : ''}
+              </td>
+            </tr>
+          `;
         } else {
           // Sort expenses
-          let sortedExpenses = [...expenses];
+          let sortedExpenses = [...filteredExpenses];
           const sortBy = sortSelect.value;
           
           if (sortBy === 'date-desc') {
@@ -673,14 +953,25 @@
           });
           
           if (sortedExpenses.length === 0) {
-            html = '<tr class="no-data"><td colspan="5">No expenses match your search</td></tr>';
+            html = `
+              <tr class="no-data">
+                <td colspan="5" style="text-align: center; padding: 40px;">
+                  <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5; display: block;"></i>
+                  <h3 style="margin-bottom: 10px;">No expenses match your search</h3>
+                  <p style="color: var(--text-secondary);">Try a different search term</p>
+                </td>
+              </tr>
+            `;
           }
           
           expensesBody.innerHTML = html;
         }
         
         // Update charts
-        updateCharts();
+        updateCharts(filteredExpenses);
+        
+        // Update filter UI
+        updateFilterUI();
       }
       
       // Export PDF
@@ -688,6 +979,8 @@
         try {
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
+          const filteredExpenses = getFilteredExpenses();
+          const stats = calculateStats(filteredExpenses);
           
           // Title
           doc.setFontSize(20);
@@ -699,7 +992,6 @@
           doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 105, 28, { align: 'center' });
           
           // Summary
-          const stats = calculateStats();
           doc.setFontSize(14);
           doc.setTextColor(0, 0, 0);
           doc.text('Summary Statistics', 20, 45);
@@ -710,46 +1002,43 @@
           doc.text(`Average per Expense: ₹${stats.average}`, 20, 69);
           doc.text(`Top Category: ${stats.topCategory}`, 20, 76);
           
-          // Category Breakdown
-          doc.setFontSize(14);
-          doc.text('Category Breakdown', 20, 90);
-          
-          const categoryData = {};
-          expenses.forEach(exp => {
-            const cat = categories[exp.category]?.name || exp.category;
-            categoryData[cat] = (categoryData[cat] || 0) + exp.amount;
-          });
-          
-          let yPos = 100;
-          Object.entries(categoryData).forEach(([cat, amount]) => {
-            doc.text(`${cat}: ₹${amount.toFixed(2)}`, 20, yPos);
-            yPos += 7;
-          });
+          // Filter info
+          if (activeFilters.categories.length > 0 || activeFilters.dateFrom || activeFilters.dateTo) {
+            doc.text('Filters Applied:', 20, 86);
+            let filterText = '';
+            if (activeFilters.categories.length > 0) {
+              filterText += 'Categories: ' + activeFilters.categories.map(cat => categories[cat]?.name || cat).join(', ');
+            }
+            if (activeFilters.dateFrom || activeFilters.dateTo) {
+              if (filterText) filterText += ', ';
+              filterText += 'Date Range: ' + (activeFilters.dateFrom || 'Start') + ' to ' + (activeFilters.dateTo || 'End');
+            }
+            doc.text(filterText, 20, 93, { maxWidth: 170 });
+          }
           
           // Recent Expenses Table
-          doc.setFontSize(14);
-          doc.text('Recent Expenses', 20, yPos + 10);
-          
-          const tableData = expenses.slice(-10).map(exp => [
+          const tableData = filteredExpenses.slice(-15).map(exp => [
             exp.date,
             categories[exp.category]?.name || exp.category,
             exp.description,
             `₹${exp.amount.toFixed(2)}`
           ]);
           
-          doc.autoTable({
-            startY: yPos + 15,
-            head: [['Date', 'Category', 'Description', 'Amount']],
-            body: tableData,
-            theme: 'grid',
-            headStyles: { fillColor: [59, 130, 246] }
-          });
+          if (tableData.length > 0) {
+            doc.autoTable({
+              startY: 105,
+              head: [['Date', 'Category', 'Description', 'Amount']],
+              body: tableData,
+              theme: 'grid',
+              headStyles: { fillColor: [59, 130, 246] }
+            });
+          }
           
           // Footer
-          const finalY = doc.lastAutoTable.finalY || yPos + 30;
+          const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 120;
           doc.setFontSize(10);
           doc.setTextColor(150, 150, 150);
-          doc.text('SmartSpend Pro - Your Personal Expense Tracker', 105, finalY + 10, { align: 'center' });
+          doc.text('SmartSpend Pro - Your Personal Expense Tracker', 105, finalY, { align: 'center' });
           
           // Save PDF
           doc.save(`SmartSpend-Report-${new Date().toISOString().split('T')[0]}.pdf`);
@@ -803,8 +1092,15 @@
       // PDF Export
       exportPdfBtn.addEventListener('click', exportPDF);
       
-      // FAB button
+      // FAB button (Desktop)
       fabBtn.addEventListener('click', function() {
+        amountInput.focus();
+        document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+        showToast('✏️ Ready to add new expense!', 'info');
+      });
+      
+      // Mobile Add button
+      mobileAddBtn.addEventListener('click', function() {
         amountInput.focus();
         document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
         showToast('✏️ Ready to add new expense!', 'info');
@@ -815,6 +1111,69 @@
       
       // Sort
       sortSelect.addEventListener('change', updateUI);
+      
+      // Sidebar toggle (mobile)
+      sidebarToggle.addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+        const isExpanded = !sidebar.classList.contains('collapsed');
+        this.setAttribute('aria-expanded', isExpanded);
+        this.innerHTML = isExpanded ? '<i class="fas fa-bars"></i> Menu' : '<i class="fas fa-bars"></i> Show Menu';
+      });
+      
+      // Category filters
+      categoryFilters.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          if (this.checked) {
+            if (!activeFilters.categories.includes(this.value)) {
+              activeFilters.categories.push(this.value);
+            }
+          } else {
+            activeFilters.categories = activeFilters.categories.filter(cat => cat !== this.value);
+          }
+          updateUI();
+        });
+      });
+      
+      // Date filters
+      dateFromInput.addEventListener('change', function() {
+        activeFilters.dateFrom = this.value;
+        updateUI();
+      });
+      
+      dateToInput.addEventListener('change', function() {
+        activeFilters.dateTo = this.value;
+        updateUI();
+      });
+      
+      // Clear filters
+      clearFiltersBtn.addEventListener('click', function() {
+        activeFilters.categories = [];
+        activeFilters.dateFrom = null;
+        activeFilters.dateTo = null;
+        updateUI();
+        showToast('🧹 Filters cleared', 'info');
+      });
+      
+      // ===== MOBILE DETECTION =====
+      function checkMobile() {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+          mobileAddBtn.style.display = 'block';
+          fabBtn.style.display = 'none';
+          // Ensure sidebar is collapsed by default on mobile
+          document.getElementById('sidebar').classList.add('collapsed');
+          sidebarToggle.setAttribute('aria-expanded', 'false');
+          sidebarToggle.innerHTML = '<i class="fas fa-bars"></i> Show Menu';
+        } else {
+          mobileAddBtn.style.display = 'none';
+          fabBtn.style.display = 'block';
+          document.getElementById('sidebar').classList.remove('collapsed');
+          sidebarToggle.setAttribute('aria-expanded', 'true');
+          sidebarToggle.innerHTML = '<i class="fas fa-bars"></i> Menu';
+        }
+      }
       
       // ===== INITIALIZE =====
       // Make functions globally available
@@ -835,11 +1194,11 @@
         },
         showData: function() {
           console.log('📊 Current expenses:', expenses);
-          console.log('📈 Statistics:', calculateStats());
+          console.log('📈 Statistics:', calculateStats(expenses));
           showToast('📊 Data logged to console', 'info');
           return {
             expenses: expenses,
-            stats: calculateStats()
+            stats: calculateStats(expenses)
           };
         },
         addSampleData: function() {
@@ -851,7 +1210,8 @@
             [120, 'entertainment', 'Movie tickets'],
             [89, 'bills', 'Electricity bill'],
             [65, 'healthcare', 'Medicine'],
-            [199, 'shopping', 'Groceries']
+            [199, 'shopping', 'Groceries'],
+            [30000, 'others', 'Big purchase']
           ];
           
           samples.forEach(([amount, category, desc], i) => {
@@ -869,6 +1229,7 @@
       
       // Initial UI update
       updateUI();
+      checkMobile();
       
       // Update theme button state
       const isDark = savedTheme === 'dark';
@@ -877,6 +1238,9 @@
       moonIcon.style.display = isDark ? 'none' : 'inline';
       sunIcon.style.display = isDark ? 'inline' : 'none';
       themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      
+      // Listen for window resize
+      window.addEventListener('resize', checkMobile);
     });
   </script>
 </body>
